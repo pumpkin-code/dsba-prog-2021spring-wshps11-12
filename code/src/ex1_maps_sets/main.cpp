@@ -122,16 +122,122 @@ IntSizetMap createMapFromVec(const IntVector& vec)
     return resMap;
 }
 
+//using namespace std;
+
 
 // TODO: HW: try to create a method that output the content of the given map as
 // a sequence of <key, value> pairs
 // Mention that IntSizetMap::const_iterator gives you a reference to the pair,
 // whose first element is the key, and the second is the value
-void printMap(const IntSizetMap& vec)
+void printMap(const IntSizetMap& myMap)
 {
+    std::cout << "{";
+
     // TODO: try to use the range-based for loop, firstly
+    //    for(const std::pair<int, unsigned long long> val : map)
+    //    {
+    //        std::cout << val.first << " == " << val.second << "\n";
+    //    }
+
+    //std::map
+
+    // The solution proposed by Ival Kovalyonok
+
+    // TODO: try to use the iteratos-based approach, secondly
+    for(IntSizetMap::const_iterator it = myMap.begin();     // the same as std::begin(myMap)
+            it != myMap.end();                              // the same as std::end(myMap)
+            ++it)
+    {
+        // (*it) gives one a dereferenced object the iterator points to, and for
+        // the map it's a pair,
+        //std::cout << (*it).first << " == " << (*it).second << "\n";   // IT's ok
+        std::cout << it->first << " => " << it->second << ", ";         // an alternative approach
+    }
+
+    std::cout << "}";
+
+
     // TODO: try to use the iteratos-based approach, secondly
 }
+
+// Prints keys only
+void printMapKeys(const IntSizetMap& myMap)
+{
+    // let's call another pair "element", because it's better than simply "value",
+    // since the value is just a part of the element (it's the second part)
+    //for(const std::pair<int, size_t> element : myMap)             // we take another pair by copying it as a new pair, but we don't need a copy
+    //for(const std::pair<int, size_t>& element : myMap)      // technically, it must be const int in the first element of the pair, because even we had non const iterator here, the key of a map must not be changed under any condition
+    for(const std::pair<const int, size_t>& element : myMap)
+    {
+        //std::cout << element.first << " == " << element.second << "\n";
+        std::cout << element.first << ", ";
+    }
+}
+
+
+void printEachTthMapElement(const IntSizetMap& myMap, size_t t)
+{
+    // TODO: HW: re-master the code below using the range-based for approach intead of iterators
+    // hint: consider using the skipping counter as well and when you need to skip elements,
+    // use the continue keyword.
+
+    if (t == 0)
+        t = 1;              // it's not a really good solution, it's better to throw an exception instead
+
+    std::cout << "{";
+
+    size_t numOfSkippedElements = t - 1;                    // we know that we have skip t - 1 elements
+
+    // try to use the iteratos-based approach, secondly
+    for (IntSizetMap::const_iterator it = myMap.begin();     // the same as std::begin(myMap)
+            it != myMap.end();                              // the same as std::end(myMap)
+            ++it)
+    {
+        // before we output (print) another value (pair), we need to skip some
+        // (t - 1)-elements
+        while (numOfSkippedElements /*!= 0*/            // all the int values are casted to a logical value implicitly: 0 gives false, all other numbers give true
+               && it != myMap.end())
+        {
+            ++it;
+            --numOfSkippedElements;
+        }
+        // altervatively we consider the condition for breaking (terminating) the while loop above:
+        // either we skipped all the necessary elements or reached the end of the collection and we can't skip anything more
+
+        // we can get out the loop under two conditions, and we must check the last one
+        if (it == myMap.end())
+            break;
+
+        std::cout << it->first << " => " << it->second << ", ";         // an alternative approach
+
+        numOfSkippedElements = t - 1;                   // the number of element to skip at the next iteration of the loop must be reset (restored)
+    }
+
+    std::cout << "}";
+}
+
+
+
+
+/// Look for a given key \a key in the given map \a myMap. If the key exists,
+/// \returns true and the associated value by using another reference variable,
+/// otherwise return false and the value of the ref var is undefined.
+
+bool findKeyInMap(const IntSizetMap& myMap, int key, size_t& val)
+{
+   IntSizetMap::const_iterator it = myMap.find(key);
+   if (it == myMap.end())
+       return false;
+
+    // if we reach this very point, we have a valid non-end iterator that points
+    // to a element with the key \a key
+    //   Here ((*it).first == key) is an invariant.
+    val = (*it).second;
+    return true;
+}
+
+// TODO: HW: Modify the method (create another (overloaded?) variant)
+// that returns a pair of <bool, size_t> with corresponding values.
 
 
 int main()
@@ -147,6 +253,25 @@ int main()
 
     // create a map from the vector
     IntSizetMap map1 = createMapFromVec(vec);
+    printMap(map1);
+    std::cout << '\n';
+
+    std::cout << "Print keys only: ";
+    printMapKeys(map1);
+    std::cout << '\n';
+
+    std::cout << "Print each 2nd elements of the map: ";
+    printEachTthMapElement(map1, 2);
+    std::cout << '\n';
+
+    size_t val;
+    if (findKeyInMap(map1, 0, val))
+        std::cout << "Found a value for key 0, which is: " << val;
+
+    if (findKeyInMap(map1, 42, val))
+        std::cout << "Found a value for key 42, which is: " << val;
+
+    std::cout << '\n';
 
     return 0;
 }
